@@ -2,7 +2,7 @@
 # - It hacks the invokeAI installer, so it does not need end-user input
 # - It hacks the installation to push rocm 6.1 on top of it
 
-FROM ubuntu:24.04
+FROM ubuntu:24.04 AS rocm-invokeai
 
 ARG ROCM_VERSION=6.2
 ARG AMDGPU_VERSION=6.2
