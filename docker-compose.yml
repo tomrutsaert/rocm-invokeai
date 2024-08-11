@@ -1,0 +1,12 @@
+services:
+  invokeai:
+    image: ghcr.io/tomrutsaert/rocm-invokeai
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - 9090:9090
+    volumes:
+      - ~/invokeai:/home/invoke/invokeai
