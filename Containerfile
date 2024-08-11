@@ -7,7 +7,7 @@ FROM ubuntu:24.04 AS rocm-invokeai
 ARG ROCM_VERSION=6.2
 ARG AMDGPU_VERSION=6.2
 
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt update -qq && DEBIAN_FRONTEND=noninteractive apt install -qq -y \
     wget \
     gpg \
     build-essential \
@@ -22,7 +22,7 @@ RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
 
 COPY rocm-pin-600 /etc/apt/preferences.d/rocm-pin-600
 
-RUN apt update && DEBIAN_FRONTEND=noninteractive apt install -y \
+RUN apt update -qq && DEBIAN_FRONTEND=noninteractive apt install -qq -y \
     amdgpu-dkms \
     rocm \
     python3.11 \
@@ -41,8 +41,8 @@ ENV INVOKEAI_PORT=9090
 
 RUN cd ~ && \
     mkdir $INVOKEAI_ROOT && \
-    wget "https://github.com/invoke-ai/InvokeAI/releases/download/v4.2.7post1/InvokeAI-installer-v4.2.7post1.zip" && \
-    unzip "InvokeAI-installer-v4.2.7post1.zip" && \
+    wget -nv "https://github.com/invoke-ai/InvokeAI/releases/download/v4.2.7post1/InvokeAI-installer-v4.2.7post1.zip" && \
+    unzip -qq "InvokeAI-installer-v4.2.7post1.zip" && \
     cd "InvokeAI-Installer" && \
     sed -i 's/messages.choose_version(self.available_releases)/"stable"/g' ./lib/installer.py && \
     sed -i 's/device = select_gpu()/device = "rocm"/g' ./lib/installer.py && \
@@ -52,7 +52,7 @@ RUN cd ~ && \
 
 ENV PATH="${PATH}:$INVOKEAI_ROOT/.venv/bin"
 
-RUN python3.11 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.1 && \
+RUN python3.11 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.1 --quiet && \
     # python3.11 -m pip install pypatchmatch && \
     rm -rf ~/InvokeAI-*
 
