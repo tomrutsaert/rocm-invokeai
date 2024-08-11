@@ -46,6 +46,7 @@ RUN cd ~ && \
     cd "InvokeAI-Installer" && \
     sed -i 's/messages.choose_version(self.available_releases)/"stable"/g' ./lib/installer.py && \
     sed -i 's/device = select_gpu()/device = "rocm"/g' ./lib/installer.py && \
+    sed -i 's/rocm5.6/rocm6.1/g' ./lib/installer.py && \
     sed -i 's/device.value ==/device ==/g' ./lib/installer.py && \
     sed -i 's/destination = auto_dest if yes_to_all else messages.dest_path(root)/destination = auto_dest/g' ./lib/installer.py && \
     ./install.sh
