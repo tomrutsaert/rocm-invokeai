@@ -4,6 +4,9 @@
 
 FROM ubuntu:24.04 AS rocm-invokeai
 
+ARG CONTAINER_UID
+ARG CONTAINER_GID
+
 RUN apt update -qq && DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -qq -y \
     unzip \
     wget \
@@ -31,17 +34,17 @@ RUN apt update -qq && DEBIAN_FRONTEND=noninteractive apt install --no-install-re
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN useradd --create-home -G sudo,video --shell /bin/bash invoke
-
-USER invoke
-WORKDIR /home/invoke
-ENV PATH="${PATH}:/opt/rocm/bin"
-ENV INVOKEAI_ROOT=/home/invoke/invokeai
+ENV CONTAINER_UID=${CONTAINER_UID:-1000}
+ENV CONTAINER_GID=${CONTAINER_GID:-1000}
+ENV INVOKEAI_SRC=/opt/invokeai
+ENV INVOKEAI_ROOT=/invokeai
 ENV INVOKEAI_HOST=0.0.0.0
 ENV INVOKEAI_PORT=9090
 
-RUN cd ~ && \
-    mkdir $INVOKEAI_ROOT && \
+WORKDIR ${INVOKEAI_SRC}
+
+RUN mkdir -p ${INVOKEAI_SRC} && chown -R ${CONTAINER_UID}:${CONTAINER_GID} ${INVOKEAI_SRC} && \
+    cd /tmp/ && \
     wget -nv "https://github.com/invoke-ai/InvokeAI/releases/download/v4.2.7post1/InvokeAI-installer-v4.2.7post1.zip" && \
     unzip -qq "InvokeAI-installer-v4.2.7post1.zip" && \
     cd "InvokeAI-Installer" && \
@@ -49,13 +52,16 @@ RUN cd ~ && \
     sed -i 's/device = select_gpu()/device = "rocm"/g' ./lib/installer.py && \
     # sed -i 's/rocm5.6/rocm6.1/g' ./lib/installer.py && \ This brings it back to torch CPU, so 5.6 is needed in current setup.....
     sed -i 's/device.value ==/device ==/g' ./lib/installer.py && \
-    sed -i 's/destination = auto_dest if yes_to_all else messages.dest_path(root)/destination = auto_dest/g' ./lib/installer.py && \
-    ./install.sh
+    sed -i 's/destination = auto_dest if yes_to_all else messages.dest_path(root)/destination = Path(os.environ.get("INVOKEAI_SRC", root)).expanduser().resolve()/g' ./lib/installer.py && \
+    ./install.sh && \
+    rm -rf /tmp/InvokeAI-*
 
-ENV PATH="${PATH}:$INVOKEAI_ROOT/.venv/bin"
+ENV PATH="${PATH}:$INVOKEAI_SRC/.venv/bin"
 
-RUN python3.11 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.1 --quiet && \
-    # python3.11 -m pip install pypatchmatch && \
-    rm -rf ~/InvokeAI-*
+#patching with pytorch rocm6.1 
+RUN python3.11 -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm6.1 --quiet
 
-CMD ["/home/invoke/invokeai/.venv/bin/invokeai-web"]
+COPY docker-entrypoint.sh ./
+RUN chmod +x /opt/invokeai/docker-entrypoint.sh
+ENTRYPOINT ["/opt/invokeai/docker-entrypoint.sh"]
+CMD ["invokeai-web"]
