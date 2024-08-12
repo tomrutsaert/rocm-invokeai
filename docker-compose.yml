@@ -9,4 +9,4 @@ services:
     ports:
       - 9090:9090
     volumes:
-      - ~/invokeai:/home/invoke/invokeai
+      - ~/invokeai:/invokeai
