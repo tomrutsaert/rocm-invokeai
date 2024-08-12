@@ -1,6 +1,6 @@
 services:
   invokeai:
-    image: ghcr.io/tomrutsaert/rocm-invokeai
+    image: ghcr.io/tomrutsaert/rocm-invokeai:main
     devices:
       - /dev/kfd
       - /dev/dri
