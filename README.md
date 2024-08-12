@@ -6,7 +6,7 @@ DockerFile with Rocm and invokeai
 docker run example:
 
 ```
-docker run --device /dev/kfd --device /dev/dri --publish 9090:9090 --security-opt seccomp=unconfined ghcr.io/tomrutsaert/rocm-invokeai
+docker run --device /dev/kfd --device /dev/dri --publish 9090:9090 --security-opt seccomp=unconfined ghcr.io/tomrutsaert/rocm-invokeai:main
 ```
 
 docker-compose exmpale see docker-compose.yml
