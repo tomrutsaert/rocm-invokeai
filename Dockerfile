@@ -2,15 +2,32 @@
 # - It hacks the invokeAI installer, so it does not need end-user input
 # - It hacks the installation to push rocm 6.1 on top of it
 
-FROM ghcr.io/tomrutsaert/rocm:main AS rocm-invokeai
+FROM ubuntu:24.04 AS rocm-invokeai
 
-RUN apt update -qq && DEBIAN_FRONTEND=noninteractive apt install -qq -y \
+RUN apt update -qq && DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -qq -y \
     unzip \
+    wget \
     software-properties-common && \
     add-apt-repository 'ppa:deadsnakes/ppa' -y && \
-    apt update -qq && DEBIAN_FRONTEND=noninteractive apt install -qq -y \
+    apt update -qq && DEBIAN_FRONTEND=noninteractive apt install --no-install-recommends -qq -y \
+    git \
+    curl \
+    vim \
+    tmux \
+    ncdu \
+    iotop \
+    bzip2 \
+    gosu \
+    magic-wormhole \
+    libglib2.0-0 \
+    libglx-mesa0 \
+    libgl1 \
     python3.11 \
-    python3.11-venv && \
+    python3-pip \
+    python3.11-venv \
+    build-essential \
+    libopencv-dev \
+    libstdc++-10-dev && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
