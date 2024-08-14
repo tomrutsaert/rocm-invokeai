@@ -1,6 +1,10 @@
 services:
   invokeai:
-    image: ghcr.io/tomrutsaert/rocm-invokeai:main
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      HSA_OVERRIDE_GFX_VERSION: 11.0.0
     devices:
       - /dev/kfd
       - /dev/dri
